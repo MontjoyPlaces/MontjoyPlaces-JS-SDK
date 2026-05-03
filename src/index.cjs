@@ -53,6 +53,14 @@ class MontjoyPlaces {
     return this.#request("GET", "/v1/custom-places", { query: params });
   }
 
+  exportCustomPlaces(params = {}) {
+    return this.#request("GET", "/v1/custom-places/export", { query: params });
+  }
+
+  importCustomPlaces(body) {
+    return this.#request("POST", "/v1/custom-places/import", { body });
+  }
+
   createCustomPlace(body) {
     return this.#request("POST", "/v1/custom-places", { body });
   }

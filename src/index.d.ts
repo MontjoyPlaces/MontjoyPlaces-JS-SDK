@@ -27,6 +27,7 @@ export interface WhoAmIResponse {
   appId: string;
   keyName: string;
   prefix: string;
+  readOnly: boolean;
 }
 
 export interface Place {
@@ -123,6 +124,13 @@ export interface CustomPlacesListResponse {
   nextCursor: string | null;
 }
 
+export interface CustomPlacesExportResponse {
+  ok: boolean;
+  count: number;
+  rows: CustomPlace[];
+  nextCursor: string | null;
+}
+
 export interface CustomPlaceSingleResponse {
   ok: boolean;
   row: CustomPlace;
@@ -146,6 +154,33 @@ export interface CustomPlaceCreateRequest {
   email?: string | null;
   tags?: JsonValue | null;
   meta?: JsonValue | null;
+}
+
+export interface CustomPlaceImportRow extends CustomPlaceCreateRequest {
+  customPlaceId?: string | null;
+  custom_place_id?: string | null;
+  group_id?: string | null;
+  fsq_place_id?: string | null;
+  owner_user_id?: string | null;
+}
+
+export interface CustomPlacesImportRequest {
+  mode?: "upsert" | "create";
+  groupId?: string | null;
+  rows?: CustomPlaceImportRow[];
+  places?: CustomPlaceImportRow[];
+}
+
+export interface ImportedCustomPlace extends CustomPlace {
+  _import_action?: "created" | "updated";
+}
+
+export interface CustomPlacesImportResponse {
+  ok: boolean;
+  imported: number;
+  created: number;
+  updated: number;
+  rows: ImportedCustomPlace[];
 }
 
 export interface CustomPlaceUpdateRequest {
@@ -320,6 +355,13 @@ export interface ListCustomPlacesParams {
   includeHidden?: "0" | "1" | boolean;
 }
 
+export interface ExportCustomPlacesParams {
+  groupId?: string | null;
+  limit?: number;
+  cursor?: string | null;
+  includeHidden?: "0" | "1" | boolean;
+}
+
 export interface LookupNearestUsCitiesParams {
   lat: number;
   lon: number;
@@ -378,6 +420,8 @@ export class MontjoyPlaces {
   updateGroup(groupId: string, body: GroupUpdateRequest): Promise<GroupSingleResponse>;
   deleteGroup(groupId: string): Promise<GroupDeleteResponse>;
   listCustomPlaces(params?: ListCustomPlacesParams): Promise<CustomPlacesListResponse>;
+  exportCustomPlaces(params?: ExportCustomPlacesParams): Promise<CustomPlacesExportResponse>;
+  importCustomPlaces(body: CustomPlacesImportRequest): Promise<CustomPlacesImportResponse>;
   createCustomPlace(body: CustomPlaceCreateRequest): Promise<CustomPlaceSingleResponse>;
   getCustomPlace(customPlaceId: string): Promise<CustomPlaceSingleResponse>;
   updateCustomPlace(customPlaceId: string, body: CustomPlaceUpdateRequest): Promise<CustomPlaceSingleResponse>;

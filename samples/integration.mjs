@@ -61,6 +61,38 @@ try {
   });
   console.log("group custom places:", customPlaces.rows.map((row) => row.name));
 
+  const exportedPlaces = await client.exportCustomPlaces({
+    groupId,
+    limit: 10,
+    includeHidden: true
+  });
+  console.log("exported custom places:", exportedPlaces.count);
+
+  const importedPlaces = await client.importCustomPlaces({
+    mode: "upsert",
+    rows: exportedPlaces.rows.map((row) => ({
+      custom_place_id: row.custom_place_id,
+      group_id: row.group_id,
+      fsq_place_id: row.fsq_place_id,
+      owner_user_id: row.owner_user_id,
+      source: row.source,
+      name: row.name,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      address: row.address,
+      locality: row.locality,
+      region: row.region,
+      postcode: row.postcode,
+      country: row.country,
+      website: row.website,
+      tel: row.tel,
+      email: row.email,
+      tags: row.tags,
+      meta: row.meta
+    }))
+  });
+  console.log("imported custom places:", importedPlaces.imported);
+
   const search = await client.searchPlaces({
     q: "coffee near Boston MA",
     limit: 3
