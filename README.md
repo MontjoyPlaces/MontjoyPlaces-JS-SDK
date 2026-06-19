@@ -33,3 +33,40 @@ const imported = await client.importCustomPlaces({
   }))
 });
 ```
+
+## Offline custom places
+
+The offline client is available as an ESM subpath export. It wraps the regular
+SDK client, caches reads, queues supported writes while offline, and flushes
+them later.
+
+```js
+import { MontjoyPlaces } from "@montjoyplaces/sdk";
+import { IndexedDbStore, MontjoyPlacesOffline } from "@montjoyplaces/sdk/offline";
+
+const online = new MontjoyPlaces({ apiKey: process.env.MONTJOY_PLACES_API_KEY });
+const places = new MontjoyPlacesOffline({
+  client: online,
+  store: new IndexedDbStore({ name: "montjoy-places" }),
+  sync: { autoStart: true }
+});
+
+await places.hydrate({
+  customPlaces: { groupId: "group_123", includeHidden: true }
+});
+
+const created = await places.createCustomPlace({
+  groupId: "group_123",
+  name: "Cached Field Note",
+  latitude: 42.3601,
+  longitude: -71.0589
+});
+
+if (created.queued) {
+  console.log("Saved locally and queued for sync:", created.mutationId);
+}
+```
+
+Supported offline writes are group create/update/delete, custom place
+create/update/delete/hide, and global place overrides. Cached search works
+against previous network results and locally cached custom places.
